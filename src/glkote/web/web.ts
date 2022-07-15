@@ -11,13 +11,13 @@ https://github.com/curiousdannii/asyncglk
 
 import {throttle} from 'lodash-es'
 
-import * as GlkOte from '../common/glkote.js'
-import * as protocol from '../../common/protocol.js'
+import * as GlkOte from '../common/glkote'
+import * as protocol from '../../common/protocol'
 
-import Metrics from './metrics.js'
-import {DOM} from './shared.js'
-import TranscriptRecorder from './transcript-recorder.js'
-import Windows, {GraphicsWindow} from './windows.js'
+import Metrics from './metrics'
+import {DOM} from './shared'
+import TranscriptRecorder from './transcript-recorder'
+import Windows, {GraphicsWindow} from './windows'
 
 interface AutosaveState {
     graphics_bg?: Array<[number, string]>,
@@ -189,7 +189,7 @@ export default class WebGlkOte extends GlkOte.GlkOteBase implements GlkOte.GlkOt
 
     protected disable(disable: boolean) {
         for (const win of this.windows.values()) {
-            win.textinput.el.prop('disabled', disable || !win.inputs?.type)
+            win.textinput?.el.prop('disabled', disable || !win.inputs?.type)
         }
         this.disabled = disable
     }
@@ -284,7 +284,7 @@ export default class WebGlkOte extends GlkOte.GlkOteBase implements GlkOte.GlkOt
         if (ev.type !== 'init' && ev.type !== 'refresh' && ev.type !== 'specialresponse') {
             for (const win of this.windows.values()) {
                 if (win.inputs?.type) {
-                    const val = win.textinput.el.val() as string
+                    const val = win.textinput?.el.val() as string
                     if (val) {
                         if (!ev.partial) {
                             ev.partial = {}

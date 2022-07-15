@@ -11,13 +11,13 @@ https://github.com/curiousdannii/asyncglk
 
 import {debounce} from 'lodash-es'
 
-import Blorb from '../../blorb/blorb.js'
-import {NBSP} from '../../common/constants.js'
-import * as protocol from '../../common/protocol.js'
+import Blorb from '../../blorb/blorb'
+import {NBSP} from '../../common/constants'
+import * as protocol from '../../common/protocol'
 
-import {TextInput} from './input.js'
-import {create, DOM, EventFunc} from './shared.js'
-import WebGlkOte from './web.js'
+import {TextInput} from './input'
+import {create, DOM, EventFunc} from './shared'
+import WebGlkOte from './web'
 
 export type Window = BufferWindow | GraphicsWindow | GridWindow
 type WindowCodes = 'buffer' | 'graphics' | 'grid'
@@ -46,7 +46,7 @@ abstract class WindowBase {
     inputs?: protocol.InputUpdate
     manager: Windows
     metrics: protocol.NormalisedMetrics
-    textinput: TextInput
+    textinput: TextInput | undefined
     type: WindowCodes
 
     constructor(options: WindowConstructorOptions) {
@@ -64,12 +64,12 @@ abstract class WindowBase {
             .appendTo(this.dom.windowport())
 
         // (this as any as Window) is a silly hack to work around Typescript's abstract class rules
-        this.textinput = new TextInput(this as any as Window)
+        // this.textinput = new TextInput(this as any as Window)
     }
 
     destroy() {
         this.frameel.remove()
-        this.textinput.destroy()
+        this.textinput?.destroy()
     }
 
     // Dummy function which is only needed for buffer windows
@@ -77,7 +77,7 @@ abstract class WindowBase {
 
     protected onclick(ev: JQuery.ClickEvent) {
         if (this.inputs?.type && no_text_selected()) {
-            this.textinput.el.trigger('focus')
+            this.textinput?.el.trigger('focus')
             return false
         }
     }
@@ -85,7 +85,7 @@ abstract class WindowBase {
     send_text_event(ev: Partial<protocol.CharEvent | protocol.LineEvent>) {
         // Measure the height of the window, which should account for a virtual keyboard
         this.measure_height()
-        this.textinput.reset()
+        this.textinput?.reset()
         // Clear the input type so we won't accidentally send it again
         this.inputs!.type = undefined
         // We're the last active window
@@ -96,7 +96,7 @@ abstract class WindowBase {
     }
 
     update_textinput() {
-        this.textinput.update()
+        this.textinput?.update()
     }
 }
 
@@ -333,9 +333,12 @@ class BufferWindow extends TextualWindow {
             role: 'log',
             tabindex: -1,
         })
+
         this.innerel = create('div', 'BufferWindowInner')
-            .append(this.textinput.el)
-            .appendTo(this.frameel)
+        if (this.textinput) {
+            this.innerel.append(this.textinput?.el)
+        }
+        this.innerel.appendTo(this.frameel)
         this.visibleheight = this.frameel.height()!
     }
 
@@ -353,7 +356,7 @@ class BufferWindow extends TextualWindow {
                     return false
                 }
             }
-            this.textinput.el.trigger('focus')
+            this.textinput?.el.trigger('focus')
             return false
         }
     }
@@ -724,7 +727,7 @@ export default class Windows extends Map<number, Window> {
         this.send_event = ev => glkote.send_event(ev)
 
         $(document).on('keydown', (ev: JQuery.KeyDownEvent) => this.onkeydown(ev))
-        this.dom.gameport().on('click', () => this.onclick())
+        this.dom.gameport().addEventListener('click', () => this.onclick())
     }
 
     cancel_inputs(windows: protocol.InputUpdate[]) {
@@ -736,9 +739,9 @@ export default class Windows extends Map<number, Window> {
         for (const win of this.values()) {
             const update = newinputs[win.id]
             if (!update && win.inputs) {
-                if (win.textinput.el.is(':focus')) {
+                if (win.textinput?.el.is(':focus')) {
                     this.active_window = win
-                    win.textinput.el.trigger('blur')
+                    win.textinput?.el.trigger('blur')
                 }
                 delete win.inputs
             }
@@ -781,8 +784,8 @@ export default class Windows extends Map<number, Window> {
                 window.frameel.trigger('click')
                 // After focusing, the keypress event will fire, but not the keydown, meaning that function keys won't be recognised
                 // So manually trigger the keydown event in the input (as long as it is actually focused)
-                if (window.textinput.el.is(':focus')) {
-                    window.textinput.el.trigger(ev)
+                if (window.textinput?.el.is(':focus')) {
+                    window.textinput?.el.trigger(ev)
                 }
                 // Otherwise focus the window so that nav keys will work
                 else if (window.type === 'buffer') {
@@ -919,11 +922,11 @@ export default class Windows extends Map<number, Window> {
         if (this.active_window) {
             // Refocus the same window if it hasn't been deleted and still wants input
             if (this.has(this.active_window.id) && this.active_window.inputs?.type) {
-                this.active_window.textinput.refocus()
+                this.active_window.textinput?.refocus()
             }
             // Look for any window with text input
             else {
-                [...this.values()].filter(win => win.inputs?.type)[0]?.textinput.refocus()
+                [...this.values()].filter(win => win.inputs?.type)[0]?.textinput?.refocus()
             }
         }
     }

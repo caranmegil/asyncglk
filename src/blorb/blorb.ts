@@ -9,7 +9,7 @@ https://github.com/curiousdannii/asyncglk
 
 */
 
-import {FileView, IFF} from './iff.js'
+import {FileView, IFF} from './iff'
 
 export interface ImageSize {
     height: number,

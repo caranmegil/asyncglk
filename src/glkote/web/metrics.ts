@@ -11,11 +11,11 @@ https://github.com/curiousdannii/asyncglk
 
 import {throttle} from 'lodash-es'
 
-import * as protocol from '../../common/protocol.js'
+import * as protocol from '../../common/protocol'
 
-import {create} from './shared.js'
-import WebGlkOte from './web.js'
-import {Window} from './windows.js'
+import {create} from './shared'
+import WebGlkOte from './web'
+import {Window} from './windows'
 
 function get_size(el: JQuery<HTMLElement>): {height: number, width: number} {
     return {
@@ -61,7 +61,8 @@ export default class Metrics {
         const resizehandler = () => this.on_gameport_resize()
         if (window.ResizeObserver) {
             const gameportResizeObserver = new ResizeObserver(resizehandler)
-            gameportResizeObserver.observe(this.glkote.dom.gameport()[0])
+            const gameport = this.glkote.dom.gameport()
+            gameportResizeObserver.observe(gameport)
         }
         else {
             $(window).on('resize', resizehandler)
@@ -73,7 +74,7 @@ export default class Metrics {
         // Ensure #gameport exists
         const dom = this.glkote.dom
         const gameport = dom.gameport()
-        if (!gameport.length) {
+        if (!gameport) {
             throw new Error(`Cannot find gameport element #${dom.gameport_id}`)
         }
 
@@ -108,7 +109,7 @@ export default class Metrics {
         const gridspan = gridline1.children('span')
         layout_test_pane.append(gridwin)
 
-        gameport.append(layout_test_pane)
+        gameport.appendChild(layout_test_pane.get()[0])
 
         // Wait first for the load event for the CSS to be loaded
         await this.loaded
@@ -117,8 +118,8 @@ export default class Metrics {
         await document.fonts.load(`14px ${font_family}`)
 
         // Measure the gameport height/width, excluding border and padding
-        this.metrics.height = gameport.height()!
-        this.metrics.width = gameport.width()!
+        this.metrics.height = gameport.clientHeight!
+        this.metrics.width = gameport.clientWidth!
 
         // Measure the buffer window
         const bufwinsize = get_size(bufwin)
@@ -182,10 +183,10 @@ export default class Metrics {
         // Should be fixed in iOS 15.1
         // Account for it by adding some padding to the #gameport
         if (ios15_0) {
-            gameport.toggleClass('ios15fix', input_is_active)
+            gameport.classList.toggle('ios15fix', input_is_active)
         }
         // And then set the outer height, to account for the padding
-        gameport.outerHeight(visualViewport.height)
+        gameport.getBoundingClientRect().height
 
         // Safari might have scrolled weirdly, so try to put it right
         window.scrollTo(0, 0)

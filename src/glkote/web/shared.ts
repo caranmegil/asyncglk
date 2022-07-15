@@ -57,8 +57,9 @@ export class DOM {
         return $(`<${tag}>`, props)
     }
 
-    gameport(): JQuery<HTMLElement> {
-        return $(`#${this.gameport_id}`, this.context_element)
+    gameport(): HTMLElement {
+        const gameportElem =  document.getElementById(this.gameport_id)!
+        return gameportElem
     }
 
     /** Return a jQuery search for an element ID, using prefix and context_element */

@@ -10,10 +10,10 @@ https://github.com/curiousdannii/asyncglk
 */
 import {throttle} from 'lodash-es'
 
-import {KEY_CODES_TO_NAMES, KEY_NAMES_TO_CODES, OFFSCREEN_OFFSET} from '../../common/constants.js'
-import * as protocol from '../../common/protocol.js'
+import {KEY_CODES_TO_NAMES, KEY_NAMES_TO_CODES, OFFSCREEN_OFFSET} from '../../common/constants'
+import * as protocol from '../../common/protocol'
 
-import {Window, apply_text_run_styles} from './windows.js'
+import {Window, apply_text_run_styles} from './windows'
 
 const MAX_HISTORY_LENGTH = 25
 
