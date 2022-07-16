@@ -64,7 +64,8 @@ abstract class WindowBase {
             .appendTo(this.dom.windowport())
 
         // (this as any as Window) is a silly hack to work around Typescript's abstract class rules
-        // this.textinput = new TextInput(this as any as Window)
+        this.textinput = new TextInput(this as any as Window)
+        this.textinput?.el.css('display', 'none')
     }
 
     destroy() {
@@ -78,6 +79,7 @@ abstract class WindowBase {
     protected onclick(ev: JQuery.ClickEvent) {
         if (this.inputs?.type && no_text_selected()) {
             this.textinput?.el.trigger('focus')
+            this.textinput?.el.css('display', 'block')
             return false
         }
     }
@@ -357,6 +359,7 @@ class BufferWindow extends TextualWindow {
                 }
             }
             this.textinput?.el.trigger('focus')
+            this.textinput?.el.css('display', 'block')
             return false
         }
     }
